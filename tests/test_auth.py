@@ -1,4 +1,8 @@
 import pytest
+import jwt
+
+from backend.auth import ALGORITHM
+from backend.config import SECRET_KEY
 
 
 def test_register_normalizes_email_and_rejects_duplicate(client):
@@ -69,3 +73,15 @@ def test_login_rejects_wrong_password(client, create_user):
 
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid email or password"
+
+
+def test_token_without_subject_is_rejected(client):
+    token = jwt.encode({}, SECRET_KEY, algorithm=ALGORITHM)
+
+    response = client.get(
+        "/api/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid authentication credentials"

@@ -32,8 +32,9 @@ os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 from backend.auth import hash_password  # noqa: E402
 from backend.database import SessionLocal, engine  # noqa: E402
 from backend.dependencies import get_db  # noqa: E402
-from backend.main import app, order_attempts  # noqa: E402
+from backend.main import app  # noqa: E402
 from backend.models import Flavor, User  # noqa: E402
+from backend.rate_limit import order_attempts  # noqa: E402
 
 
 @pytest.fixture(scope="session", autouse=True)

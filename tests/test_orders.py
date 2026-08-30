@@ -84,6 +84,27 @@ def test_empty_cart_returns_400(client, auth_headers):
     assert response.json()["detail"] == "Cart is empty"
 
 
+def test_checkout_rejects_flavor_that_became_unavailable(
+    client, auth_headers, create_flavor
+):
+    customer = auth_headers("customer@example.com")
+    admin = auth_headers("admin@example.com", role="admin")
+    flavor = create_flavor()
+    add_to_cart(client, customer, flavor.id)
+    disabled = client.patch(
+        f"/api/flavors/{flavor.id}",
+        json={"available": False},
+        headers=admin,
+    )
+    assert disabled.status_code == 200
+
+    response = client.post("/api/orders", headers=customer)
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Flavor is unavailable"
+    assert len(client.get("/api/cart", headers=customer).json()) == 1
+
+
 def test_sixth_order_attempt_within_minute_returns_429(
     client, auth_headers
 ):
