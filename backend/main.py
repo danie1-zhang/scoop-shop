@@ -287,6 +287,7 @@ def create_order(db: Session = Depends(get_db), current_user: User = Depends(get
         order_item = OrderItem(
             order_id=order.id,
             flavor_id=cart_item.flavor_id,
+            flavor_name_at_purchase=flavor.name,
             quantity=cart_item.quantity,
             price_at_purchase=flavor.price
         )

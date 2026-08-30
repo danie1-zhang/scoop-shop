@@ -116,6 +116,7 @@ class OrderItemResponse(BaseModel):
     id: int
     order_id: int
     flavor_id: int
+    flavor_name_at_purchase: str
     quantity: int
     price_at_purchase: Decimal
 

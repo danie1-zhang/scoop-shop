@@ -101,6 +101,7 @@ class OrderItem(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"), nullable=False)
     flavor_id: Mapped[int] = mapped_column(ForeignKey("flavors.id"), nullable=False)
+    flavor_name_at_purchase: Mapped[str] = mapped_column(String(100), nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
     price_at_purchase: Mapped[Decimal] = mapped_column(Numeric(10, 2))
 
