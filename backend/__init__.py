@@ -1,0 +1,1 @@
+"""Scoop Shop backend package."""

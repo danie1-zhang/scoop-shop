@@ -260,14 +260,6 @@ def create_order(db: Session = Depends(get_db), current_user: User = Depends(get
     if not cart_items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
-    order = Order(
-        user_id=current_user.id,
-        total_price=Decimal("0")
-    )
-
-    db.add(order)
-    db.flush()
-
     total = Decimal("0")
 
     for cart_item in cart_items:
@@ -279,7 +271,18 @@ def create_order(db: Session = Depends(get_db), current_user: User = Depends(get
         if not flavor.available:
             raise HTTPException(status_code=409, detail="Flavor is unavailable")
 
-        line_total = flavor.price * cart_item.quantity
+        total += flavor.price * cart_item.quantity
+
+    order = Order(
+        user_id=current_user.id,
+        total_price=total,
+    )
+
+    db.add(order)
+    db.flush()
+
+    for cart_item in cart_items:
+        flavor = cart_item.flavor
 
         order_item = OrderItem(
             order_id=order.id,
@@ -289,10 +292,6 @@ def create_order(db: Session = Depends(get_db), current_user: User = Depends(get
         )
 
         db.add(order_item)
-
-        total += line_total
-
-    order.total_price = total
 
     for cart_item in cart_items:
         db.delete(cart_item)
