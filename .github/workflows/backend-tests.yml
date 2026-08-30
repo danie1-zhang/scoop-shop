@@ -12,6 +12,7 @@ jobs:
       JWT_SECRET_KEY: ci-only-test-secret
       DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/scoop_shop_test
       TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/scoop_shop_test
+      CORS_ORIGINS: http://localhost:5173
 
     services:
       postgres:

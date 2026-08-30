@@ -19,3 +19,8 @@ def get_required_env(name: str) -> str:
 
 SECRET_KEY = get_required_env("JWT_SECRET_KEY")
 DATABASE_URL = get_required_env("DATABASE_URL")
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in get_required_env("CORS_ORIGINS").split(",")
+    if origin.strip()
+]
