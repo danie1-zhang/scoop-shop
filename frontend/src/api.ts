@@ -2,15 +2,28 @@ import type {
   CartItemRequest,
   CartItemResponse,
   CartItemUpdateRequest,
+  Flavor,
   FlavorListResponse,
+  FlavorCreateRequest,
+  FlavorUpdateRequest,
   LoginCredentials,
   OrderResponse,
+  OrderListResponse,
   RegisterCredentials,
   TokenResponse,
   User,
 } from './types'
 
 const API_URL = import.meta.env.VITE_API_URL
+
+async function getErrorMessage(response: Response, fallback: string) {
+  try {
+    const body = (await response.json()) as { detail?: string }
+    return body.detail ?? fallback
+  } catch {
+    return fallback
+  }
+}
 
 export async function getFlavors(
   page: number = 1,
@@ -95,7 +108,7 @@ export async function addCartItem(
   })
 
   if (!response.ok) {
-    throw new Error('Unable to add item to cart')
+    throw new Error(await getErrorMessage(response, 'Unable to add item to cart'))
   }
 
   return response.json()
@@ -130,7 +143,7 @@ export async function updateCartItem(
   })
 
   if (!response.ok) {
-    throw new Error('Unable to update cart item')
+    throw new Error(await getErrorMessage(response, 'Unable to update cart item'))
   }
 
   return response.json()
@@ -145,17 +158,69 @@ export async function createOrder(token: string): Promise<OrderResponse> {
   })
 
   if (!response.ok) {
-    let message = 'Unable to create order'
-
-    try {
-      const errorBody = (await response.json()) as { detail?: string }
-      message = errorBody.detail ?? message
-    } catch {
-      // Keep the generic message when the server does not return JSON.
-    }
-
-    throw new Error(message)
+    throw new Error(await getErrorMessage(response, 'Unable to create order'))
   }
 
   return response.json()
+}
+
+export async function deleteCartItem(token: string, cartItemId: number) {
+  const response = await fetch(`${API_URL}/api/cart/items/${cartItemId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, 'Unable to remove cart item'))
+  }
+}
+
+export async function getOrders(
+  token: string,
+  page = 1,
+  pageSize = 5,
+): Promise<OrderListResponse> {
+  const response = await fetch(
+    `${API_URL}/api/orders?page=${page}&page_size=${pageSize}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, 'Unable to load orders'))
+  }
+  return response.json()
+}
+
+export async function getManagedFlavors(token: string): Promise<Flavor[]> {
+  const response = await fetch(`${API_URL}/api/flavors/manage`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) throw new Error(await getErrorMessage(response, 'Unable to load flavors'))
+  return response.json()
+}
+
+export async function createFlavor(token: string, data: FlavorCreateRequest): Promise<Flavor> {
+  const response = await fetch(`${API_URL}/api/flavors`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  if (!response.ok) throw new Error(await getErrorMessage(response, 'Unable to create flavor'))
+  return response.json()
+}
+
+export async function updateFlavor(token: string, id: number, data: FlavorUpdateRequest): Promise<Flavor> {
+  const response = await fetch(`${API_URL}/api/flavors/${id}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  })
+  if (!response.ok) throw new Error(await getErrorMessage(response, 'Unable to update flavor'))
+  return response.json()
+}
+
+export async function deleteFlavor(token: string, id: number) {
+  const response = await fetch(`${API_URL}/api/flavors/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) throw new Error(await getErrorMessage(response, 'Unable to delete flavor'))
 }

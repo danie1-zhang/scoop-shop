@@ -9,10 +9,12 @@ export function CartPanel() {
     isCartLoading,
     cartError,
     updateQuantity,
+    removeItem,
     checkout,
   } = useCart()
   const [updatingItemId, setUpdatingItemId] = useState<number | null>(null)
   const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [removingItemId, setRemovingItemId] = useState<number | null>(null)
   const [completedOrder, setCompletedOrder] = useState<OrderResponse | null>(
     null,
   )
@@ -48,6 +50,13 @@ export function CartPanel() {
     } finally {
       setIsCheckingOut(false)
     }
+  }
+
+  async function handleRemove(cartItemId: number) {
+    setRemovingItemId(cartItemId)
+    try { await removeItem(cartItemId) }
+    catch { return }
+    finally { setRemovingItemId(null) }
   }
 
   return (
@@ -127,6 +136,14 @@ export function CartPanel() {
                   </div>
 
                   <strong>${lineTotal.toFixed(2)}</strong>
+                  <button
+                    className="remove-button"
+                    type="button"
+                    disabled={removingItemId !== null || updatingItemId !== null}
+                    onClick={() => void handleRemove(item.id)}
+                  >
+                    {removingItemId === item.id ? 'Removing…' : 'Remove'}
+                  </button>
                 </li>
               )
             })}

@@ -112,6 +112,23 @@ def test_flavor_pagination_excludes_unavailable_flavors(
     )
 
 
+def test_admin_management_list_includes_unavailable_flavors(client, auth_headers):
+    admin = auth_headers("admin@example.com", role="admin")
+    customer = auth_headers("customer@example.com")
+    client.post(
+        "/api/flavors",
+        json=flavor_payload("Hidden", available=False),
+        headers=admin,
+    )
+
+    assert client.get("/api/flavors/manage", headers=customer).status_code == 403
+    response = client.get("/api/flavors/manage", headers=admin)
+
+    assert response.status_code == 200
+    assert response.json()[0]["name"] == "Hidden"
+    assert response.json()[0]["available"] is False
+
+
 def test_flavor_patch_rejects_explicit_null(client, auth_headers):
     admin = auth_headers("admin@example.com", role="admin")
     flavor = client.post(

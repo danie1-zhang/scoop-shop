@@ -50,6 +50,7 @@ test('checks out the cart and displays the order confirmation', async () => {
         addItem: vi.fn(),
         updateQuantity: vi.fn(),
         refreshCart: vi.fn(),
+        removeItem: vi.fn(),
         checkout,
       }}
     >
@@ -66,4 +67,30 @@ test('checks out the cart and displays the order confirmation', async () => {
       'Order #42 was created successfully for $9.00.',
     ),
   ).toBeInTheDocument()
+})
+
+test('removes an item from the cart', async () => {
+  const user = userEvent.setup()
+  const removeItem = vi.fn().mockResolvedValue(undefined)
+
+  render(
+    <CartContext.Provider
+      value={{
+        items: [cartItem],
+        isCartLoading: false,
+        cartError: null,
+        addItem: vi.fn(),
+        updateQuantity: vi.fn(),
+        refreshCart: vi.fn(),
+        removeItem,
+        checkout: vi.fn(),
+      }}
+    >
+      <CartPanel />
+    </CartContext.Provider>,
+  )
+
+  await user.click(screen.getByRole('button', { name: 'Remove' }))
+
+  expect(removeItem).toHaveBeenCalledWith(cartItem.id)
 })

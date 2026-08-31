@@ -14,6 +14,15 @@ export type FlavorListResponse = {
     total: number
 }
 
+export type FlavorCreateRequest = {
+  name: string
+  description: string
+  price: string
+  available: boolean
+}
+
+export type FlavorUpdateRequest = Partial<FlavorCreateRequest>
+
 export type UserRole = 'customer' | 'admin'
 
 export type User = {
@@ -71,4 +80,11 @@ export type OrderResponse = {
   total_price: string
   created_at: string
   items: OrderItemResponse[]
+}
+
+export type OrderListResponse = {
+  items: OrderResponse[]
+  page: number
+  page_size: number
+  total: number
 }

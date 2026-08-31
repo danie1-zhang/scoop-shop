@@ -11,6 +11,7 @@ export type CartContextValue = {
     cartItemId: number,
     quantity: number,
   ) => Promise<void>
+  removeItem: (cartItemId: number) => Promise<void>
   checkout: () => Promise<OrderResponse>
 }
 

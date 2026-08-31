@@ -47,6 +47,14 @@ def create_flavor(
     return flavor
 
 
+@router.get("/manage", response_model=list[FlavorResponse])
+def get_all_flavors(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin),
+):
+    return db.query(Flavor).order_by(Flavor.id.asc()).all()
+
+
 @router.get("/{flavor_id}", response_model=FlavorResponse)
 def get_flavor(flavor_id: int, db: Session = Depends(get_db)):
     flavor = db.query(Flavor).filter(Flavor.id == flavor_id).first()

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import {
   addCartItem,
   createOrder,
+  deleteCartItem,
   getCartItems,
   updateCartItem as sendCartItemUpdate,
 } from '../api'
@@ -174,6 +175,28 @@ export function CartProvider({ children }: CartProviderProps) {
     }
   }
 
+  async function removeItem(cartItemId: number) {
+    if (token === null) {
+      throw new Error('You must log in before updating your cart.')
+    }
+
+    setCartError(null)
+
+    try {
+      await deleteCartItem(token, cartItemId)
+      setItems((currentItems) =>
+        currentItems.filter((item) => item.id !== cartItemId),
+      )
+    } catch (caughtError) {
+      const message =
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Unable to remove cart item.'
+      setCartError(message)
+      throw caughtError
+    }
+  }
+
   return (
     <CartContext.Provider
       value={{
@@ -183,6 +206,7 @@ export function CartProvider({ children }: CartProviderProps) {
         addItem,
         updateQuantity,
         refreshCart,
+        removeItem,
         checkout,
       }}
     >
